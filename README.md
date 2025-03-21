@@ -1,53 +1,28 @@
-# Welcome to React Router!
+# Getting started
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Local:
 
-## Features
+- Clone repo: `git clone https://github.com/Randulfe/surfe-notes.git`
+- Install dependencies: `npm ci`
+- Run project: `npm run dev`
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+Deployment: 
+- Build: `npm run build`
 
-## Getting Started
+# Technical decisions
 
-### Installation
+### React SPA with React Router
 
-Install the dependencies:
+- The requirements clearly prefer simple solutions without over complicating the wheel with external libraries and tools
+- The data is to be persisted across browser sessions instead of user sessions, thus, only the browser/FE context is important. 
+- A NextJS or Tanstack application with SSR seems a bit of an overkill, specially giving that this seems to be a FE exclusive application without DB persistency. Moreover, the routing should be simple with just two page types available. 
 
-```bash
-npm install
-```
+### External libraries
 
-### Development
+- Tanstack Query:
+- React Router: 
+- Tailwind: 
+- Storybook: 
+- Zustand:
 
-Start the development server with HMR:
-
-```bash
-npm run dev
-```
-
-Your application will be available at `http://localhost:3000`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fremix-run%2Freact-router-templates%2Ftree%2Fmain%2Fvercel&project-name=my-react-router-app&repository-name=my-react-router-app)
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+# Potential improvements
