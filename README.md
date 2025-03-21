@@ -6,7 +6,8 @@ Local:
 - Install dependencies: `npm ci`
 - Run project: `npm run dev`
 
-Deployment: 
+Deployment:
+
 - Build: `npm run build`
 
 # Technical decisions
@@ -14,15 +15,20 @@ Deployment:
 ### React SPA with React Router
 
 - The requirements clearly prefer simple solutions without over complicating the wheel with external libraries and tools
-- The data is to be persisted across browser sessions instead of user sessions, thus, only the browser/FE context is important. 
-- A NextJS or Tanstack application with SSR seems a bit of an overkill, specially giving that this seems to be a FE exclusive application without DB persistency. Moreover, the routing should be simple with just two page types available. 
+- The data is to be persisted across browser sessions instead of user sessions, thus, only the browser/FE context is important.
+- A NextJS or Tanstack application with SSR seems a bit of an overkill, specially giving that this seems to be a FE exclusive application without DB persistency. Moreover, the routing should be simple with just two page types available.
+
+### Pipeline
+
+- Husky pre-commit hooks: runs quick test to prevent overloading the server CI/CD pipeline with code we didn't meant to push. This is, anything with Typescript, Eslint, Prettier or Unit test issues. Tests that can take longer or need feedback from other members of the team will be left to the CI/CD pipeline server.
+- Github actions: Great for running E2E tests that might take longer or might need feedback/discussion from other engineers, PMs or QAs.
 
 ### External libraries
 
-- Tanstack Query:
-- React Router: 
-- Tailwind: 
-- Storybook: 
-- Zustand:
+- Tanstack Query: Great solution for controlling API/BE/third parties state and context. It solves many complex problems for you (caching, pagination, etc.) without taking away the flexibility and low level control you might need.
+- React Router: Simple solution great for an SPA that manages all the browser history complexities and lets you focus on what matters: architecting the application and how the user interacts with it.
+- Tailwind: Low level scalable solution for styling keeping context in the component and isolating abstraction to the application entities (user input, dashboards, etc.) rather than the technologies (HTML, CSS, JS, etc.). I believe this is the USP of React and Tailwind just enables that in the styling dimension.
+- Storybook: Will speed up UI/UX component building isolating their functionality and allowing easy and fast testing. It will also enable true E2E component testing that isn't a waste of time in the FE.
+- Zustand: Great solution for controlling application/FE state and context. Simple yet effective and reliable that solves some of React Context pain points without adding complexity nor boilerplate code.
 
 # Potential improvements

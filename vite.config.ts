@@ -8,4 +8,11 @@ export default defineConfig(({ command }) => ({
     noExternal: command === "build" ? true : undefined,
   },
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  test: {
+    browser: {
+      provider: "playwright",
+      enabled: true,
+      instances: [{ browser: "chromium" }],
+    },
+  },
 }));
