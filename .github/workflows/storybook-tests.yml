@@ -13,6 +13,6 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run Storybook tests
-        run: npm test-storybook
+        run: npm run test
         env:
           SB_URL: "${{ github.event.deployment_status.target_url }}"

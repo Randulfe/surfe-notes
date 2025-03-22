@@ -16,8 +16,7 @@
     "commitlint": "commitlint",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "test-storybook": "test-storybook"
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@react-router/node": "^7.1.5",
