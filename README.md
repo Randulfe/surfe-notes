@@ -34,6 +34,7 @@ Deployment:
 # Potential improvements
 
 - Better CI/CD setup
+  - PR template
   - Release please
   - Automatic storybook creation on PR public for those with access to the repo
   - Integration with a work tracking system like Jira
