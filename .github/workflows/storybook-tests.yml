@@ -12,6 +12,8 @@ jobs:
           node-version: "18.x"
       - name: Install dependencies
         run: npm install
+      - name: Install Playwright browsers
+        run: npx playwright install
       - name: Run Storybook tests
         run: npm run test
         env:
