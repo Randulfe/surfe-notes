@@ -11,8 +11,8 @@ jobs:
         with:
           node-version: "18.x"
       - name: Install dependencies
-        run: yarn
+        run: npm
       - name: Run Storybook tests
-        run: yarn test-storybook
+        run: npm test-storybook
         env:
           SB_URL: "${{ github.event.deployment_status.target_url }}"
