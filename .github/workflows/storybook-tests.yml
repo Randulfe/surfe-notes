@@ -11,7 +11,7 @@ jobs:
         with:
           node-version: "18.x"
       - name: Install dependencies
-        run: npm
+        run: npm install
       - name: Run Storybook tests
         run: npm test-storybook
         env:
