@@ -6,15 +6,17 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "test": "vitest",
+    "test:watch": "vitest",
+    "test": "vitest run",
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "commit": "commit",
+    "commitlint": "commitlint",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "test:browser": "vitest --workspace=vitest.workspace.browser.ts"
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@react-router/node": "^7.1.5",
@@ -24,12 +26,12 @@
     "react-router": "^7.1.5"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^3.2.6",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@eslint/js": "^9.22.0",
     "@react-router/dev": "^7.1.5",
     "@storybook/addon-a11y": "^8.6.7",
     "@storybook/addon-essentials": "^8.6.7",
-    "@storybook/addon-onboarding": "^8.6.7",
     "@storybook/experimental-addon-test": "^8.6.7",
     "@storybook/react-vite": "^8.6.7",
     "@storybook/test": "^8.6.7",

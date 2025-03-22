@@ -1,5 +1,5 @@
-npm run format 
-npm run typecheck || (echo "❌ TypeScript check failed" && exit 1)
-npm run lint:fix || (echo "❌ ESLint check failed" && exit 1)
-npm run format || (echo "❌ Prettier check failed" && exit 1)
+npm run format  > /dev/null 
+npm run typecheck  > /dev/null || (echo "❌ TypeScript check failed" && exit 1)
+npm run lint:fix  > /dev/null || (echo "❌ ESLint check failed" && exit 1)
+npm run format  > /dev/null || (echo "❌ Prettier check failed" && exit 1)
 echo "🎉 All checks passed!"

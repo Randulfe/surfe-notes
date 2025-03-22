@@ -32,3 +32,14 @@ Deployment:
 - Zustand: Great solution for controlling application/FE state and context. Simple yet effective and reliable that solves some of React Context pain points without adding complexity nor boilerplate code.
 
 # Potential improvements
+
+- Better CI/CD setup
+  - Release please
+  - Automatic storybook creation on PR public for those with access to the repo
+  - Integration with a work tracking system like Jira
+- Design System package that can be used across different applications if the Notes app grew (if working in a feature with both changes in the DS and your project you can always use yalc to sync)
+- Ngrok integration to test local changes across different devices
+- Storybook improvements
+  - Chromatic integration with Storybook to point out visual differences in Storybook
+  - Figma integration with Storybook to point components to their source of truth
+- Containers in local and different envs (dev, staging, prod)

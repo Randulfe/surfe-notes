@@ -1,0 +1,1 @@
+npm run commitlint  || (echo "❌ Please adhere to conventional commit messages" && exit 1)
