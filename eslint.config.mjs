@@ -111,6 +111,12 @@ export default tseslint.config(
       ...prettierConfig.rules,
     },
   },
+  {
+    files: ["**/*.stories.{ts,tsx}"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
   js.configs.recommended,
   tseslint.configs.recommended,
   tseslint.configs.strict,
