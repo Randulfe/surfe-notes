@@ -1,14 +1,9 @@
-import type { User, Location } from "~/entities/user";
+import type { User } from "~/entities/user";
 import { EmailIcon, LocationIcon, PhoneIcon } from "../Icons";
+import { getLocationUrl } from "~/utils/getLocationUrl";
 
 interface TooltipProps {
   user: User;
-}
-
-function getGoogleMapsUrl(location: Location): string {
-  const fullAddress = `${location.street}, ${location.city}, ${location.state} ${location.postcode}`;
-  const encodedAddress = encodeURIComponent(fullAddress);
-  return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
 }
 
 export const Tooltip = ({
@@ -36,7 +31,7 @@ export const Tooltip = ({
           <PhoneIcon size="s" />
         </a>
         <a
-          href={getGoogleMapsUrl(location)}
+          href={getLocationUrl(location)}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-primary text-gray-600"
