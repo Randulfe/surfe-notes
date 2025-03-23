@@ -6,7 +6,7 @@ interface MentionProps {
 
 export const Mention = ({ user: { username } }: MentionProps) => {
   return (
-    <span className="bg-light text-primary cursor-pointer rounded-sm p-2">
+    <span className="bg-light text-primary m-1 cursor-pointer rounded-sm p-1">
       @{username}
     </span>
   );

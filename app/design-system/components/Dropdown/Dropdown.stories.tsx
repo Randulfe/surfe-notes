@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Dropdown } from "./Dropdown";
 import type { User } from "~/entities/user";
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const meta = {
   title: "Dropdown",
@@ -60,18 +60,37 @@ const users: User[] = [
 export const Basic: Story = {
   render: (args) => {
     const [query, setQuery] = useState("");
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const inputRef = useRef<HTMLInputElement>(null);
     const onChange = (user: User) => {
       setQuery(user.username);
     };
+
+    useEffect(() => {
+      const updatePosition = () => {
+        if (!inputRef.current) return;
+        const rect = inputRef.current.getBoundingClientRect();
+        setPosition({ x: rect.left, y: rect.bottom });
+      };
+
+      updatePosition();
+    }, []);
+
     return (
       <>
         <input
+          ref={inputRef}
           type="text"
           className="mb-2 rounded-sm border-2 border-solid border-gray-300"
           onChange={(e) => setQuery(e.target.value)}
           value={query}
         />
-        <Dropdown {...args} query={query} onSelect={onChange} />
+        <Dropdown
+          {...args}
+          query={query}
+          onSelect={onChange}
+          position={position}
+        />
       </>
     );
   },

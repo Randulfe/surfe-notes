@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, forwardRef } from "react";
 import type { User } from "~/entities/user";
 
 interface DropdownProps {
@@ -8,81 +8,79 @@ interface DropdownProps {
   onSelect: (user: User) => void;
 }
 
-export const Dropdown = ({
-  users,
-  query,
-  position = { x: 0, y: 0 },
-  onSelect,
-}: DropdownProps) => {
-  const [focusUser, setFocusUser] = useState<number | null>(null);
-  const listRef = useRef<HTMLUListElement>(null);
+export const Dropdown = forwardRef<HTMLUListElement, DropdownProps>(
+  ({ users, query, position = { x: 0, y: 0 }, onSelect }, ref) => {
+    const [focusUser, setFocusUser] = useState<number | null>(null);
 
-  const filteredUsers = useMemo(() => {
-    if (!query) return users;
-    return users.filter((user) => user.username.includes(query));
-  }, [users, query]);
+    const filteredUsers = useMemo(() => {
+      if (!query) return users;
+      return users.filter((user) => user.username.includes(query));
+    }, [users, query]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
-    if (!filteredUsers.length) return;
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
+      if (!filteredUsers.length) return;
 
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setFocusUser((prev) =>
-          prev === null ? 0 : Math.min(prev + 1, filteredUsers.length - 1),
-        );
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setFocusUser((prev) =>
-          prev === null ? filteredUsers.length - 1 : Math.max(prev - 1, 0),
-        );
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (!focusUser) break;
-        onSelect(filteredUsers[focusUser]);
-        break;
-      default:
-        break;
-    }
-  };
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setFocusUser((prev) =>
+            prev === null ? 0 : Math.min(prev + 1, filteredUsers.length - 1),
+          );
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setFocusUser((prev) =>
+            prev === null ? filteredUsers.length - 1 : Math.max(prev - 1, 0),
+          );
+          break;
+        case "Enter":
+          e.preventDefault();
+          if (!focusUser) break;
+          onSelect(filteredUsers[focusUser]);
+          break;
+        default:
+          break;
+      }
+    };
 
-  if (!filteredUsers.length) return null;
+    if (!filteredUsers.length) return null;
 
-  return (
-    <ul
-      ref={listRef}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      className="focus-visible:border-primary bg-lighter absolute z-10 flex min-w-48 list-none flex-col divide-y divide-gray-300 rounded-md border-1 border-solid border-gray-200 shadow-md focus:outline-none"
-      role="dialog"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y + 20}px`,
-      }}
-    >
-      {filteredUsers.map((user, ix) => {
-        return (
-          <li
-            className={`flex cursor-pointer flex-col px-4 py-3 ${
-              focusUser === ix ? "bg-light" : ""
-            } ${ix === 0 ? "rounded-t-md" : ""} ${
-              ix === filteredUsers.length - 1 ? "rounded-b-md" : ""
-            }`}
-            key={user.username}
-            onMouseEnter={() => setFocusUser(ix)}
-            onMouseLeave={() => setFocusUser(null)}
-            aria-selected={focusUser === ix}
-            onClick={() => onSelect(user)}
-          >
-            <p className="text-primary">@{user.username}</p>
-            <p className="text-sm text-gray-500">
-              {user.firstName} {user.lastName}
-            </p>
-          </li>
-        );
-      })}
-    </ul>
-  );
-};
+    return (
+      <ul
+        ref={ref}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        className="focus-visible:border-primary bg-lighter absolute z-10 flex min-w-48 list-none flex-col divide-y divide-gray-300 rounded-md border-1 border-solid border-gray-200 shadow-md focus:outline-none"
+        role="dialog"
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y + 20}px`,
+        }}
+      >
+        {filteredUsers.map((user, ix) => {
+          return (
+            <li
+              className={`flex cursor-pointer flex-col px-4 py-3 ${
+                focusUser === ix ? "bg-light" : ""
+              } ${ix === 0 ? "rounded-t-md" : ""} ${
+                ix === filteredUsers.length - 1 ? "rounded-b-md" : ""
+              }`}
+              key={user.username}
+              onMouseEnter={() => setFocusUser(ix)}
+              onMouseLeave={() => setFocusUser(null)}
+              aria-selected={focusUser === ix}
+              onClick={() => onSelect(user)}
+            >
+              <p className="text-primary">@{user.username}</p>
+              <p className="text-sm text-gray-500">
+                {user.firstName} {user.lastName}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  },
+);
+
+Dropdown.displayName = "Dropdown";
