@@ -25,6 +25,17 @@ export interface CursorPosition {
   char: number;
 }
 
+export const getCursorPositionInHTML = (element: HTMLDivElement): number => {
+  const selection = window.getSelection();
+  if (!selection || !element) return 0;
+  const range = selection.getRangeAt(0);
+  if (!range) return 0;
+  const clonedRange = range.cloneRange();
+  clonedRange.selectNodeContents(element);
+  clonedRange.setEnd(range.endContainer, range.endOffset);
+  return clonedRange.toString().length;
+};
+
 export const getCursorPosition = (element: HTMLDivElement): CursorPosition => {
   // First get cursor position without taking into account the sanitized HTML
   const selection = window.getSelection();
