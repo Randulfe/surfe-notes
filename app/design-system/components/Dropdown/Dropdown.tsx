@@ -4,14 +4,21 @@ import type { User } from "~/entities/user";
 interface DropdownProps {
   users: User[];
   query: string;
+  position?: { x: number; y: number };
   onSelect: (user: User) => void;
 }
 
-export const Dropdown = ({ users, query, onSelect }: DropdownProps) => {
+export const Dropdown = ({
+  users,
+  query,
+  position = { x: 0, y: 0 },
+  onSelect,
+}: DropdownProps) => {
   const [focusUser, setFocusUser] = useState<number | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   const filteredUsers = useMemo(() => {
+    if (!query) return users;
     return users.filter((user) => user.username.includes(query));
   }, [users, query]);
 
@@ -41,13 +48,19 @@ export const Dropdown = ({ users, query, onSelect }: DropdownProps) => {
     }
   };
 
+  if (!filteredUsers.length) return null;
+
   return (
     <ul
       ref={listRef}
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      className="focus-visible:border-primary flex min-w-48 list-none flex-col divide-y divide-gray-300 rounded-md border-1 border-solid border-gray-200 shadow-md focus:outline-none"
+      className="focus-visible:border-primary bg-lighter absolute z-10 flex min-w-48 list-none flex-col divide-y divide-gray-300 rounded-md border-1 border-solid border-gray-200 shadow-md focus:outline-none"
       role="dialog"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y + 20}px`,
+      }}
     >
       {filteredUsers.map((user, ix) => {
         return (
