@@ -62,6 +62,8 @@ export const Basic: Story = {
     const [query, setQuery] = useState("");
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const inputRef = useRef<HTMLInputElement>(null);
+    const dropDownRef = useRef(null);
+
     const onChange = (user: User) => {
       setQuery(user.username);
     };
@@ -86,8 +88,10 @@ export const Basic: Story = {
           value={query}
         />
         <Dropdown
+          ref={dropDownRef}
           {...args}
           query={query}
+          // @ts-expect-error - TS doesn't infer well forwardRefs with generics
           onSelect={onChange}
           position={position}
         />
@@ -95,7 +99,10 @@ export const Basic: Story = {
     );
   },
   args: {
-    users,
+    data: users,
+    labelKey: "username",
+    displayKeys: ["firstName", "lastName"],
+    prefix: "@",
     query: "",
     onSelect: () => undefined,
   },

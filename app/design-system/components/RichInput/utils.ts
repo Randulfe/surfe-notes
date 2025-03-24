@@ -30,10 +30,37 @@ export const getCursorPositionInHTML = (element: HTMLDivElement): number => {
   if (!selection || !element) return 0;
   const range = selection.getRangeAt(0);
   if (!range) return 0;
-  const clonedRange = range.cloneRange();
-  clonedRange.selectNodeContents(element);
-  clonedRange.setEnd(range.endContainer, range.endOffset);
-  return clonedRange.toString().length;
+
+  // Create a temporary div to hold the content
+  const tempDiv = document.createElement("div");
+  // If range outside of our div return 0
+  if (!element.contains(range.endContainer)) return 0;
+
+  // Get all child nodes of the element
+  const childNodes = Array.from(element.childNodes);
+
+  // Find the node containing our cursor
+  const cursorNode = range.endContainer;
+  const cursorOffset = range.endOffset;
+
+  // Clone each node up to and including the cursor node
+  for (const node of childNodes) {
+    if (node === cursorNode) {
+      // For the cursor node, only clone up to the cursor position
+      const nodeFragment = document.createRange();
+      nodeFragment.setStart(node, 0);
+      nodeFragment.setEnd(cursorNode, cursorOffset);
+      tempDiv.appendChild(nodeFragment.cloneContents());
+      break;
+    } else {
+      // For nodes before the cursor node, clone the entire node
+      tempDiv.appendChild(node.cloneNode(true));
+    }
+  }
+  // HTML up to cursor
+  const htmlUpToCursor = tempDiv.innerHTML;
+
+  return htmlUpToCursor.length;
 };
 
 export const getCursorPosition = (element: HTMLDivElement): CursorPosition => {

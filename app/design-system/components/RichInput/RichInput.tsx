@@ -93,20 +93,22 @@ export const RichInput = ({ users }: RichInputProps) => {
     // Then update the innerHTML
     const cursorPositionInHTML = getCursorPositionInHTML(inputRef.current);
     const mentionStartHTML = value.lastIndexOf("@", cursorPositionInHTML);
-    if (mentionStart === -1) return;
+
+    if (mentionStartHTML === -1) return;
 
     // Replace the @query with a span with id to then replace with the mention component
     const beforeMentionHTML = value.substring(0, mentionStartHTML);
     const afterMentionHTML = value.substring(
       mentionStartHTML + dropdownQuery.length + 1,
     );
-    const newValueHTML = `${beforeMentionHTML}<span id="mention">@${user.username}</span>${afterMentionHTML}`;
+    const newValueHTML = `${beforeMentionHTML}<span id="mention"></span>${afterMentionHTML}`;
     inputRef.current.innerHTML = newValueHTML;
 
     // Replace the span with the react component using createRoot
     const mentionElement = document.getElementById("mention");
 
     if (mentionElement) {
+      mentionElement.removeAttribute("id");
       mentionElement.contentEditable = "false";
       const root = createRoot(mentionElement);
       root.render(<Mention user={user} />);
@@ -151,9 +153,13 @@ export const RichInput = ({ users }: RichInputProps) => {
       {isDropdownOpen && (
         <Dropdown
           ref={dropdownRef}
-          users={users}
+          data={users}
+          labelKey="username"
+          displayKeys={["firstName", "lastName"]}
+          prefix="@"
           query={dropdownQuery}
           position={{ x: cursorPosition?.x ?? 0, y: cursorPosition?.y ?? 0 }}
+          // @ts-expect-error - TS doesn't infer well forwardRefs with generics
           onSelect={handleSelect}
         />
       )}

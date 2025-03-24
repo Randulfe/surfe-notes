@@ -44,3 +44,4 @@ Deployment:
   - Chromatic integration with Storybook to point out visual differences in Storybook
   - Figma integration with Storybook to point components to their source of truth
 - Containers in local and different envs (dev, staging, prod)
+- Husky output logs if step failed
