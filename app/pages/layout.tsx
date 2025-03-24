@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { Button } from "~/design-system/components/Button/Button";
 import { SidebarItem } from "~/design-system/components/SideBarItem/SidebarItem";
 import type { Note } from "~/entities/note";
@@ -13,11 +13,17 @@ import { Modal } from "~/design-system/components/Modal/Modal";
 import DOMPurify from "dompurify";
 
 export default function ProjectLayout() {
-  const { sessions, activeSession, setActiveSession, addSession } =
-    useSessionStore();
+  const {
+    sessions,
+    activeSession,
+    setActiveSession,
+    addSession,
+    removeAllSessions,
+  } = useSessionStore();
   const { data: notes } = useNotes(activeSession?.value);
   const { mutate: createNote } = useCreateNote(activeSession?.value);
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [newWorkspace, setNewWorkspace] = useState("");
@@ -29,13 +35,15 @@ export default function ProjectLayout() {
     createNote(undefined, {
       onSuccess: (data) => {
         queryClient.setQueryData(
-          ["notes", activeSession],
-          (oldData: Note[]) => {
-            oldData.push(data);
-            return oldData;
+          ["notes", activeSession?.value],
+          (oldData: Note[] | undefined) => {
+            if (!oldData) return [data];
+            return [...oldData, data];
           },
         );
-        navigate(`/note/${data.id}`);
+        if (location.pathname !== "/") {
+          navigate(`/note/${data.id}`);
+        }
       },
       onError: () => {
         // TODO: Add toast to show error on create note
@@ -104,34 +112,57 @@ export default function ProjectLayout() {
                   onChange={handleSessionChange}
                 />
               )}
-
-              <Button
-                variant="tertiary"
-                size="s"
-                onClick={() => setIsNewSessionModalOpen(true)}
-              >
-                Create New Workspace
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="tertiary"
+                  size="s"
+                  onClick={() => setIsNewSessionModalOpen(true)}
+                >
+                  Create New Workspace
+                </Button>
+                <Button
+                  status="error"
+                  variant="tertiary"
+                  size="s"
+                  onClick={() => {
+                    removeAllSessions();
+                    setIsNewSessionModalOpen(true);
+                  }}
+                >
+                  Nuke All Workspaces
+                </Button>
+              </div>
             </div>
 
             <div className="py-5">
+              <div className="hover:bg-light mx-2 mb-3 rounded-md border-[1px] border-solid border-gray-300 transition-all duration-300">
+                <NavLink to={"/"} onClick={() => setIsSidebarOpen(false)}>
+                  <SidebarItem content="All Notes" />
+                </NavLink>
+              </div>
               <p className="text-primary pl-5 text-sm font-medium">Notes</p>
-              <div className="flex flex-col divide-y divide-gray-300">
-                {notes &&
-                  notes.length > 0 &&
-                  notes.map((note) => (
-                    <NavLink
-                      key={note.id}
-                      to={`/note/${note.id}`}
-                      onClick={() => setIsSidebarOpen(false)}
-                    >
-                      <SidebarItem
-                        content={
-                          note.body.length > 0 ? note.body : "Empty note 🍃"
-                        }
-                      />
-                    </NavLink>
-                  ))}
+              <div className="relative h-92">
+                <div className="from-lighter via-lighter pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b to-transparent" />
+                <div className="from-lighter via-lighter pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6 bg-gradient-to-t to-transparent" />
+                <div className="absolute inset-0 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex flex-col divide-y divide-gray-300">
+                    {notes &&
+                      notes.length > 0 &&
+                      notes.map((note) => (
+                        <NavLink
+                          key={note.id}
+                          to={`/note/${note.id}`}
+                          onClick={() => setIsSidebarOpen(false)}
+                        >
+                          <SidebarItem
+                            content={
+                              note.body.length > 0 ? note.body : "Empty note 🍃"
+                            }
+                          />
+                        </NavLink>
+                      ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -172,7 +203,9 @@ export default function ProjectLayout() {
         </form>
       </Modal>
       <main className="sm:ms-64">
-        <Outlet />
+        <div className="flex h-[1px] min-h-screen w-full flex-col">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

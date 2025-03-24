@@ -90,12 +90,10 @@ export const Note = ({ id }: { id: string }) => {
   };
 
   return (
-    <div className="flex h-[1px] min-h-screen w-full flex-col p-12 sm:p-16">
-      {isErrorNotes ? (
-        <NoteError />
-      ) : isLoadingNotes ? (
-        <LoadingIndicator label="Loading your note" />
-      ) : note ? (
+    <div className="h-full p-12 sm:p-16">
+      {isErrorNotes && <NoteError />}
+      {isLoadingNotes && <LoadingIndicator label="Loading your note" />}
+      {note && (
         <div className="h-full min-h-full">
           <RichInput
             users={users}
@@ -103,8 +101,6 @@ export const Note = ({ id }: { id: string }) => {
             onChange={handleContentChange}
           />
         </div>
-      ) : (
-        <NoteError />
       )}
     </div>
   );
