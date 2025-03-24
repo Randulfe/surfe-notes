@@ -1,6 +1,7 @@
 export * from "./Email";
 export * from "./Location";
 export * from "./Phone";
+export * from "./Burger";
 
 export interface IconProps {
   fill?: string;
