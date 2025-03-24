@@ -1,49 +1,63 @@
 import { useMemo, useState, forwardRef } from "react";
-import type { User } from "~/entities/user";
 
-interface DropdownProps {
-  users: User[];
+interface DropdownProps<T> {
+  data: T[];
   query: string;
+  labelKey: keyof T;
+  displayKeys?: (keyof T)[];
+  prefix?: string;
   position?: { x: number; y: number };
-  onSelect: (user: User) => void;
+  onSelect: (data: T) => void;
 }
 
-export const Dropdown = forwardRef<HTMLUListElement, DropdownProps>(
-  ({ users, query, position = { x: 0, y: 0 }, onSelect }, ref) => {
-    const [focusUser, setFocusUser] = useState<number | null>(null);
+export const Dropdown = forwardRef(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  <T extends Record<string, any>>(
+    {
+      data,
+      labelKey,
+      displayKeys,
+      query,
+      prefix,
+      position = { x: 0, y: 0 },
+      onSelect,
+    }: DropdownProps<T>,
+    ref: React.ForwardedRef<HTMLUListElement>,
+  ) => {
+    const [focusItem, setFocusItem] = useState<number | null>(null);
 
-    const filteredUsers = useMemo(() => {
-      if (!query) return users;
-      return users.filter((user) => user.username.includes(query));
-    }, [users, query]);
+    const filteredData = useMemo(() => {
+      if (!query) return data;
+      return data.filter((item) => item[labelKey].includes(query));
+    }, [data, query, labelKey]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
-      if (!filteredUsers.length) return;
+      if (!filteredData.length) return;
 
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          setFocusUser((prev) =>
-            prev === null ? 0 : Math.min(prev + 1, filteredUsers.length - 1),
+          setFocusItem((prev) =>
+            prev === null ? 0 : Math.min(prev + 1, filteredData.length - 1),
           );
           break;
         case "ArrowUp":
           e.preventDefault();
-          setFocusUser((prev) =>
-            prev === null ? filteredUsers.length - 1 : Math.max(prev - 1, 0),
+          setFocusItem((prev) =>
+            prev === null ? filteredData.length - 1 : Math.max(prev - 1, 0),
           );
           break;
         case "Enter":
           e.preventDefault();
-          if (!focusUser) break;
-          onSelect(filteredUsers[focusUser]);
+          if (!focusItem) break;
+          onSelect(filteredData[focusItem]);
           break;
         default:
           break;
       }
     };
 
-    if (!filteredUsers.length) return null;
+    if (!filteredData.length) return null;
 
     return (
       <ul
@@ -57,24 +71,29 @@ export const Dropdown = forwardRef<HTMLUListElement, DropdownProps>(
           top: `${position.y + 20}px`,
         }}
       >
-        {filteredUsers.map((user, ix) => {
+        {filteredData.map((item, ix) => {
           return (
             <li
               className={`flex cursor-pointer flex-col px-4 py-3 ${
-                focusUser === ix ? "bg-light" : ""
+                focusItem === ix ? "bg-light" : ""
               } ${ix === 0 ? "rounded-t-md" : ""} ${
-                ix === filteredUsers.length - 1 ? "rounded-b-md" : ""
+                ix === filteredData.length - 1 ? "rounded-b-md" : ""
               }`}
-              key={user.username}
-              onMouseEnter={() => setFocusUser(ix)}
-              onMouseLeave={() => setFocusUser(null)}
-              aria-selected={focusUser === ix}
-              onClick={() => onSelect(user)}
+              key={item[labelKey]}
+              onMouseEnter={() => setFocusItem(ix)}
+              onMouseLeave={() => setFocusItem(null)}
+              aria-selected={focusItem === ix}
+              onClick={() => onSelect(item)}
             >
-              <p className="text-primary">@{user.username}</p>
-              <p className="text-sm text-gray-500">
-                {user.firstName} {user.lastName}
+              <p className="text-primary">
+                {prefix && prefix}
+                {item[labelKey]}
               </p>
+              {displayKeys && (
+                <p className="text-sm text-gray-500">
+                  {displayKeys.map((key) => item[key]).join(" ")}
+                </p>
+              )}
             </li>
           );
         })}
