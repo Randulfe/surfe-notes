@@ -1,0 +1,5 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Force specific files to use LF
+*.{js,jsx,ts,tsx,css,json,md} text eol=lf
