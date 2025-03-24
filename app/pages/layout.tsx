@@ -27,10 +27,12 @@ export default function ProjectLayout() {
         navigate(`/note/${data.id}`);
       },
       onError: () => {
-        // TODO: Handle error
+        // TODO: Add toast to show error on create note
       },
     });
   };
+
+  // TODO: Add toast to show error if notes aren't reachable
 
   return (
     <div>
@@ -44,7 +46,6 @@ export default function ProjectLayout() {
         </button>
       )}
 
-      {/* Backdrop for mobile */}
       {isSidebarOpen && (
         <div
           className="bg-opacity-50 fixed inset-0 z-50 bg-black opacity-20 lg:hidden"

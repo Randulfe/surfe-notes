@@ -5,9 +5,30 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { useNotes, useUpdateNote } from "~/web/notes";
 import { useUsers } from "~/web/users";
 import type { Note as NoteType } from "~/entities/note";
+import { LoadingIndicator } from "~/design-system/components/LoadingIndicator/LoadingIndicator";
+
+const NoteError = () => {
+  return (
+    <p>
+      There was an issue retrieving your note, please refresh the page. If the
+      issue persists please reach out at{" "}
+      <a
+        className="text-primary underline"
+        href="mailto:mateorandulfe@surfe.com"
+      >
+        mateorandulfe@surfe.com
+      </a>
+      .
+    </p>
+  );
+};
 
 export const Note = ({ id }: { id: string }) => {
-  const { data: notes } = useNotes("DEFAULT_SESSION");
+  const {
+    data: notes,
+    isLoading: isLoadingNotes,
+    isError: isErrorNotes,
+  } = useNotes("DEFAULT_SESSION");
   const { data: users } = useUsers();
   const { mutate: updateNote } = useUpdateNote("DEFAULT_SESSION");
   const queryClient = useQueryClient();
@@ -44,7 +65,7 @@ export const Note = ({ id }: { id: string }) => {
             );
           },
           onError: () => {
-            // TODO: handle error state
+            // TODO: Add toast to show error on update note with useful message
           },
         },
       );
@@ -59,7 +80,11 @@ export const Note = ({ id }: { id: string }) => {
 
   return (
     <div className="flex h-[1px] min-h-screen w-full flex-col p-12 sm:p-16">
-      {note ? (
+      {isErrorNotes ? (
+        <NoteError />
+      ) : isLoadingNotes ? (
+        <LoadingIndicator label="Loading your note" />
+      ) : note ? (
         <div className="h-full min-h-full">
           <RichInput
             users={users}
@@ -68,7 +93,7 @@ export const Note = ({ id }: { id: string }) => {
           />
         </div>
       ) : (
-        <p>No note found</p>
+        <NoteError />
       )}
     </div>
   );
