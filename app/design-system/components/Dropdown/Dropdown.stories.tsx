@@ -3,18 +3,6 @@ import { Dropdown } from "./Dropdown";
 import type { User } from "~/entities/user";
 import { useRef, useState, useEffect } from "react";
 
-const meta = {
-  title: "Dropdown",
-  component: Dropdown,
-  parameters: {
-    layout: "centered",
-  },
-  tags: ["autodocs"],
-} satisfies Meta<typeof Dropdown>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
 const users: User[] = [
   {
     firstName: "John",
@@ -56,6 +44,18 @@ const users: User[] = [
     },
   },
 ];
+
+const meta = {
+  title: "Dropdown",
+  component: Dropdown,
+  parameters: {
+    layout: "centered",
+  },
+  tags: ["autodocs"],
+} satisfies Meta<typeof Dropdown>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
   render: (args) => {

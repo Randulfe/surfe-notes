@@ -6,6 +6,8 @@ import { useNotes, useUpdateNote } from "~/web/notes";
 import { useUsers } from "~/web/users";
 import type { Note as NoteType } from "~/entities/note";
 import { LoadingIndicator } from "~/design-system/components/LoadingIndicator/LoadingIndicator";
+import { useSessionStore } from "~/stores/session";
+import { useNavigate } from "react-router";
 
 const NoteError = () => {
   return (
@@ -24,18 +26,27 @@ const NoteError = () => {
 };
 
 export const Note = ({ id }: { id: string }) => {
+  const { activeSession } = useSessionStore();
+  const navigate = useNavigate();
   const {
     data: notes,
     isLoading: isLoadingNotes,
     isError: isErrorNotes,
-  } = useNotes("DEFAULT_SESSION");
+  } = useNotes(activeSession?.value);
   const { data: users } = useUsers();
-  const { mutate: updateNote } = useUpdateNote("DEFAULT_SESSION");
+  const { mutate: updateNote } = useUpdateNote(activeSession?.value);
   const queryClient = useQueryClient();
 
   const note = useMemo(() => {
     return notes?.find((note) => note.id.toString() === id);
   }, [notes, id]);
+
+  // Redirect to home if note doesn't exist
+  useEffect(() => {
+    if (!isLoadingNotes && notes && !note) {
+      navigate("/");
+    }
+  }, [isLoadingNotes, notes, note, navigate]);
 
   const [content, setContent] = useState(note?.body ?? "");
 
@@ -56,7 +67,7 @@ export const Note = ({ id }: { id: string }) => {
         {
           onSuccess: (updatedNote: NoteType) => {
             queryClient.setQueryData(
-              ["notes", "DEFAULT_SESSION"],
+              ["notes", activeSession],
               (oldData: NoteType[]) => {
                 return oldData.map((note) =>
                   note.id === updatedNote.id ? updatedNote : note,
@@ -70,7 +81,7 @@ export const Note = ({ id }: { id: string }) => {
         },
       );
     },
-    [note, id, updateNote, queryClient],
+    [note, id, updateNote, queryClient, activeSession],
   );
   useDebounce(content, handleUpdateNote, 1000);
 

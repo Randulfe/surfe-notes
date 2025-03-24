@@ -9,7 +9,7 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs"],
-  args: { onClick: fn() },
+  args: { onClick: fn(), size: "m", children: "Button", variant: "primary" },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -26,5 +26,19 @@ export const Secondary: Story = {
     variant: "secondary",
     children: "Button",
     type: "submit",
+  },
+};
+
+export const Tertiary: Story = {
+  args: {
+    variant: "tertiary",
+    children: "Button",
+  },
+};
+
+export const Large: Story = {
+  args: {
+    size: "l",
+    children: "Button",
   },
 };

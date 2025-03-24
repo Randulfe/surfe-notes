@@ -2,18 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { RichInput } from "./RichInput";
 import type { User } from "~/entities/user";
 
-const meta = {
-  title: "Rich Input",
-  component: RichInput,
-  parameters: {
-    layout: "centered",
-  },
-  tags: ["autodocs"],
-} satisfies Meta<typeof RichInput>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
 const users: User[] = [
   {
     firstName: "John",
@@ -55,6 +43,18 @@ const users: User[] = [
     },
   },
 ];
+
+const meta = {
+  title: "Rich Input",
+  component: RichInput,
+  parameters: {
+    layout: "centered",
+  },
+  tags: ["autodocs"],
+} satisfies Meta<typeof RichInput>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
   args: { users, value: "", onChange: () => undefined },
