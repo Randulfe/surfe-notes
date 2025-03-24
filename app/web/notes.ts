@@ -1,22 +1,29 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "./webFactory";
+import type { Note } from "~/entities/note";
 
-const getNotes = async (sessionId: string) => {
+const getNotes = async (sessionId: string): Promise<Note[]> => {
   const { data } = await api.get(`/${sessionId}/notes`);
   return data;
 };
 
-const getNote = async (sessionId: string, noteId: string) => {
+const getNote = async (sessionId: string, noteId: string): Promise<Note> => {
   const { data } = await api.get(`/${sessionId}/notes/${noteId}`);
   return data;
 };
 
-const createNote = async (sessionId: string, note: string) => {
-  const { data } = await api.post(`/${sessionId}/notes`, { body: note });
+const createNote = async (sessionId: string): Promise<Note> => {
+  const { data } = await api.post(`/${sessionId}/notes`, {
+    body: `Your note from ${new Date().toLocaleDateString("en-US", { weekday: "long" })}`,
+  });
   return data;
 };
 
-const updateNote = async (sessionId: string, noteId: string, note: string) => {
+const updateNote = async (
+  sessionId: string,
+  noteId: string,
+  note: string,
+): Promise<Note> => {
   const { data } = await api.put(`/${sessionId}/notes/${noteId}`, {
     body: note,
   });
@@ -39,8 +46,7 @@ export const useNote = (sessionId: string, noteId: string) => {
 
 export const useCreateNote = (sessionId: string) => {
   return useMutation({
-    mutationFn: (params: { note: string }) =>
-      createNote(sessionId, params.note),
+    mutationFn: () => createNote(sessionId),
   });
 };
 

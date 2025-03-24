@@ -6,36 +6,48 @@ interface TooltipContentProps {
   user: User;
 }
 
-export const TooltipContent = ({
-  user: { username, firstName, lastName, email, phone, location },
-}: TooltipContentProps) => {
+export const TooltipContent = ({ user }: TooltipContentProps) => {
   return (
     <>
       <div>
-        <p className="text-primary">@{username}</p>
-        <p className="text-sm text-gray-500">
-          {firstName} {lastName}
-        </p>
+        <p className="text-primary">@{user.username}</p>
+        {user.firstName ||
+          (user.lastName && (
+            <p className="text-sm text-gray-500">
+              {user?.firstName} {user?.lastName}
+            </p>
+          ))}
       </div>
-      <div className="flex flex-row gap-2">
-        <a
-          href={`mailto:${email}`}
-          className="hover:text-primary text-gray-600"
-        >
-          <EmailIcon size="s" />
-        </a>
-        <a href={`phone:${phone}`} className="hover:text-primary text-gray-600">
-          <PhoneIcon size="s" />
-        </a>
-        <a
-          href={getLocationUrl(location)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-primary text-gray-600"
-        >
-          <LocationIcon size="s" />
-        </a>
-      </div>
+      {(user.email || user.phone || user.location) && (
+        <div className="flex flex-row gap-2">
+          {user.email && (
+            <a
+              href={`mailto:${user.email}`}
+              className="hover:text-primary text-gray-600"
+            >
+              <EmailIcon size="s" />
+            </a>
+          )}
+          {user.phone && (
+            <a
+              href={`tel:${user.phone}`}
+              className="hover:text-primary text-gray-600"
+            >
+              <PhoneIcon size="s" />
+            </a>
+          )}
+          {user.location && (
+            <a
+              href={getLocationUrl(user.location)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary text-gray-600"
+            >
+              <LocationIcon size="s" />
+            </a>
+          )}
+        </div>
+      )}
     </>
   );
 };

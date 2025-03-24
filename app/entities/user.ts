@@ -1,10 +1,10 @@
 export interface User {
-  firstName: string;
-  lastName: string;
   username: string;
-  email: string;
-  phone: string;
-  location: Location;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  location?: Location;
 }
 
 export interface Location {
