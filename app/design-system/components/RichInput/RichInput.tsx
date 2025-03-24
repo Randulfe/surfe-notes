@@ -91,14 +91,15 @@ export const RichInput = ({ users }: RichInputProps) => {
     setValue(newValue);
 
     // Then update the innerHTML
+    const element = inputRef.current.innerHTML;
     const cursorPositionInHTML = getCursorPositionInHTML(inputRef.current);
-    const mentionStartHTML = value.lastIndexOf("@", cursorPositionInHTML);
+    const mentionStartHTML = element.lastIndexOf("@", cursorPositionInHTML);
 
     if (mentionStartHTML === -1) return;
 
     // Replace the @query with a span with id to then replace with the mention component
-    const beforeMentionHTML = value.substring(0, mentionStartHTML);
-    const afterMentionHTML = value.substring(
+    const beforeMentionHTML = element.substring(0, mentionStartHTML);
+    const afterMentionHTML = element.substring(
       mentionStartHTML + dropdownQuery.length + 1,
     );
     const newValueHTML = `${beforeMentionHTML}<span id="mention"></span>${afterMentionHTML}`;

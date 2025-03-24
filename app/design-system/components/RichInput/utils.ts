@@ -33,8 +33,6 @@ export const getCursorPositionInHTML = (element: HTMLDivElement): number => {
 
   // Create a temporary div to hold the content
   const tempDiv = document.createElement("div");
-  // If range outside of our div return 0
-  if (!element.contains(range.endContainer)) return 0;
 
   // Get all child nodes of the element
   const childNodes = Array.from(element.childNodes);
