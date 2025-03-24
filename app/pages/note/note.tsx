@@ -58,7 +58,7 @@ export const Note = ({ id }: { id: string }) => {
   };
 
   return (
-    <div className="flex h-[1px] min-h-screen w-full flex-col p-16">
+    <div className="flex h-[1px] min-h-screen w-full flex-col p-12 sm:p-16">
       {note ? (
         <div className="h-full min-h-full">
           <RichInput

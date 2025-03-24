@@ -4,11 +4,15 @@ import { Button } from "~/design-system/components/Button/Button";
 import { SidebarItem } from "~/design-system/components/SideBarItem/SidebarItem";
 import type { Note } from "~/entities/note";
 import { useCreateNote, useNotes } from "~/web/notes";
+import { useState } from "react";
+import { BurgerIcon } from "~/design-system/components/Icons";
+
 export default function ProjectLayout() {
   const { data: notes } = useNotes("DEFAULT_SESSION");
   const { mutate: createNote } = useCreateNote("DEFAULT_SESSION");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleCreateNote = () => {
     createNote(undefined, {
@@ -30,8 +34,28 @@ export default function ProjectLayout() {
 
   return (
     <div>
+      {!isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="fixed top-4 left-4 z-70 cursor-pointer rounded-lg p-2 text-gray-300 transition-all duration-300 hover:bg-gray-100 sm:hidden lg:hidden"
+          aria-label="Toggle sidebar"
+        >
+          <BurgerIcon />
+        </button>
+      )}
+
+      {/* Backdrop for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="bg-opacity-50 fixed inset-0 z-50 bg-black opacity-20 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <aside
-        className="bg-lighter fixed start-0 end-auto top-0 bottom-0 z-60 block h-full w-64 translate-x-0 border-e border-gray-200"
+        className={`bg-lighter fixed start-0 end-auto top-0 bottom-0 z-60 block h-full w-64 transform border-e border-gray-200 transition-transform duration-300 ease-in-out sm:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
         aria-label="Sidebar"
       >
         <div className="flex h-full w-full flex-col justify-between">
@@ -39,7 +63,11 @@ export default function ProjectLayout() {
             {notes &&
               notes.length > 0 &&
               notes.map((note) => (
-                <NavLink key={note.id} to={`/note/${note.id}`}>
+                <NavLink
+                  key={note.id}
+                  to={`/note/${note.id}`}
+                  onClick={() => setIsSidebarOpen(false)}
+                >
                   <SidebarItem
                     content={note.body.length > 0 ? note.body : "Empty note 🍃"}
                   />
@@ -53,7 +81,7 @@ export default function ProjectLayout() {
           </div>
         </div>
       </aside>
-      <main className="ms-64">
+      <main className="sm:ms-64">
         <Outlet />
       </main>
     </div>
