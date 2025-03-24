@@ -57,5 +57,5 @@ const users: User[] = [
 ];
 
 export const Basic: Story = {
-  args: { users },
+  args: { users, value: "" },
 };

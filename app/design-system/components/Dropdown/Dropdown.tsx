@@ -27,8 +27,8 @@ export const Dropdown = forwardRef(
     const [focusItem, setFocusItem] = useState<number | null>(null);
 
     const filteredData = useMemo(() => {
-      if (!query) return data;
-      return data.filter((item) => item[labelKey].includes(query));
+      if (!query) return data.slice(0, 5);
+      return data.filter((item) => item[labelKey].includes(query)).slice(0, 5);
     }, [data, query, labelKey]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {

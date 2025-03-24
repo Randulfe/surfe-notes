@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dropdown } from "../Dropdown/Dropdown";
 import type { User } from "~/entities/user";
 import {
@@ -13,12 +13,11 @@ import { createRoot } from "react-dom/client";
 
 interface RichInputProps {
   users: User[];
+  value: string;
 }
 
-// TODO: next step append mentions (React component) and handle new tag element appended to the value
-
-export const RichInput = ({ users }: RichInputProps) => {
-  const [value, setValue] = useState("");
+export const RichInput = ({ users, value: initialValue }: RichInputProps) => {
+  const [value, setValue] = useState(initialValue);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(
     null,
   );
@@ -26,6 +25,11 @@ export const RichInput = ({ users }: RichInputProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const inputRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    inputRef.current.innerHTML = initialValue;
+  }, [initialValue]);
 
   const updateMentionState = (
     element: HTMLDivElement,
@@ -135,10 +139,10 @@ export const RichInput = ({ users }: RichInputProps) => {
   };
 
   return (
-    <div>
+    <div className="h-full min-h-full">
       <div
         ref={inputRef}
-        className="z-0 h-48 w-48 bg-amber-200"
+        className="z-0 h-full min-h-full w-full rounded-md p-4 text-xl focus:outline-gray-300"
         role="textbox"
         contentEditable
         spellCheck
