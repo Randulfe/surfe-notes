@@ -45,3 +45,4 @@ Deployment:
   - Figma integration with Storybook to point components to their source of truth
 - Containers in local and different envs (dev, staging, prod)
 - Husky output logs if step failed
+- I know it's a bit of a stereotype but honestly, if I had more time for this I would have added unit tests to the `richInput` editor as I'm building it rather than later or not adding them. I have just been short of time given other responsibilities I got.
