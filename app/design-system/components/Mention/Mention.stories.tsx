@@ -2,18 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Mention } from "./Mention";
 import type { User } from "~/entities/user";
 
-const meta = {
-  title: "Mention",
-  component: Mention,
-  parameters: {
-    layout: "centered",
-  },
-  tags: ["autodocs"],
-} satisfies Meta<typeof Mention>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
 const user: User = {
   firstName: "John",
   lastName: "Doe",
@@ -27,6 +15,18 @@ const user: User = {
     street: "123 Main St",
   },
 };
+
+const meta = {
+  title: "Mention",
+  component: Mention,
+  parameters: {
+    layout: "centered",
+  },
+  tags: ["autodocs"],
+} satisfies Meta<typeof Mention>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
   args: {

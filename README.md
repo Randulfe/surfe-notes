@@ -46,3 +46,5 @@ Deployment:
 - Containers in local and different envs (dev, staging, prod)
 - Husky output logs if step failed
 - I know it's a bit of a stereotype but honestly, if I had more time for this I would have added unit tests to the `richInput` editor as I'm building it rather than later or not adding them. I have just been short of time given other responsibilities I got.
+- If sessions were a more complex data system I would rather use array of objects or hash maps than the array of strings I've got
+- The DS components would be a bit more generic and open to many different data structures and not so tight to my application
