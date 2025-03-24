@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import type { User } from "~/entities/user";
 
 export const sanitizeAndNormalize = (value: string): string => {
   // Sanitize user input (this won't change tags added by the browser)
@@ -10,8 +11,17 @@ export const sanitizeAndNormalize = (value: string): string => {
   // Wrapping divs
   result = result.replace(/<div>/gi, "<br/>").replace(/<\/div>/gi, "");
 
+  // Convert <br> to <br/>
+  result = result.replace(/<br>/gi, "<br/>");
+
   // Wrapping ps
   result = result.replace(/<p>/gi, "<br/>").replace(/<\/p>/gi, "");
+
+  // Convert mention components back to @username format
+  result = result.replace(
+    /<span[^>]*><span[^>]*>@([^<]+)<\/span><\/span>/gi,
+    "@$1",
+  );
 
   // Handle some browsers converting some spaces to &nbsp;
   result = result.replace(/&nbsp;/g, " ");
@@ -131,4 +141,17 @@ export const getMentionQuery = (
   if (currentWord.indexOf("@", 1) !== -1) return null;
 
   return currentWord.slice(1);
+};
+
+export const getMentionDummyText = (value: string, users: User[]) => {
+  // Regex to find @username
+  const regex = /(^|(?:<br\s*\/?>|\s))(@(\S+))/gi;
+
+  // Replace valid mentions with dummy span if user exists
+  const newHTML = value.replace(regex, (match, prefix, _, username) => {
+    const user = users.find((user) => user.username === username);
+    if (!user) return match;
+    return prefix + `<span data-username="${username}"></span>`;
+  });
+  return newHTML;
 };

@@ -4,6 +4,7 @@ import type { User } from "~/entities/user";
 import {
   getCursorPosition,
   getCursorPositionInHTML,
+  getMentionDummyText,
   getMentionQuery,
   sanitizeAndNormalize,
   type CursorPosition,
@@ -12,12 +13,17 @@ import { Mention } from "../Mention/Mention";
 import { createRoot } from "react-dom/client";
 
 interface RichInputProps {
-  users: User[];
+  users: User[] | undefined;
   value: string;
+  onChange: (value: string) => void;
 }
 
-export const RichInput = ({ users, value: initialValue }: RichInputProps) => {
-  const [value, setValue] = useState(initialValue);
+export const RichInput = ({
+  users,
+  value: initialValue,
+  onChange,
+}: RichInputProps) => {
+  const [value, setValue] = useState("");
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(
     null,
   );
@@ -26,10 +32,38 @@ export const RichInput = ({ users, value: initialValue }: RichInputProps) => {
   const inputRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
 
-  useEffect(() => {
+  function processMentions(value: string, users: { username: string }[]) {
     if (!inputRef.current) return;
-    inputRef.current.innerHTML = initialValue;
-  }, [initialValue]);
+    const newHTML = getMentionDummyText(value, users);
+
+    // Update innerHTML with the dummy spans
+    inputRef.current.innerHTML = newHTML;
+
+    // Find dummy spans and attach React components
+    const mentionElements = inputRef.current.querySelectorAll("span");
+    mentionElements.forEach((el) => {
+      const username = el.getAttribute("data-username");
+      if (!username) return;
+      const user = users.find((user) => user.username === username);
+      if (!user) return;
+      // Clean up containing spans
+      el.removeAttribute("data-username");
+      (el as HTMLElement).contentEditable = "false";
+      // Attach React component
+      const root = createRoot(el);
+      root.render(<Mention user={user} />);
+    });
+  }
+
+  useEffect(() => {
+    if (initialValue !== value && users !== undefined) {
+      setValue(initialValue);
+      if (inputRef.current) {
+        processMentions(initialValue, users);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only for initialValue
+  }, [initialValue, users]);
 
   const updateMentionState = (
     element: HTMLDivElement,
@@ -52,7 +86,7 @@ export const RichInput = ({ users, value: initialValue }: RichInputProps) => {
     const newValue = e.currentTarget.innerHTML;
     const parsedValue = sanitizeAndNormalize(newValue);
     setValue(parsedValue);
-
+    onChange(parsedValue);
     if (inputRef.current) {
       updateMentionState(inputRef.current, parsedValue);
     }
@@ -93,6 +127,7 @@ export const RichInput = ({ users, value: initialValue }: RichInputProps) => {
     );
     const newValue = `${beforeMention}@${user.username}${afterMention}`;
     setValue(newValue);
+    onChange(newValue);
 
     // Then update the innerHTML
     const element = inputRef.current.innerHTML;
@@ -158,7 +193,7 @@ export const RichInput = ({ users, value: initialValue }: RichInputProps) => {
       {isDropdownOpen && (
         <Dropdown
           ref={dropdownRef}
-          data={users}
+          data={users ?? []}
           labelKey="username"
           displayKeys={["firstName", "lastName"]}
           prefix="@"

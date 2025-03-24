@@ -40,7 +40,9 @@ export default function ProjectLayout() {
               notes.length > 0 &&
               notes.map((note) => (
                 <NavLink key={note.id} to={`/note/${note.id}`}>
-                  <SidebarItem content={note.body} />
+                  <SidebarItem
+                    content={note.body.length > 0 ? note.body : "Empty note 🍃"}
+                  />
                 </NavLink>
               ))}
           </div>
