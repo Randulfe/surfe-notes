@@ -1,16 +1,18 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Dropdown } from "../Dropdown/Dropdown";
 import type { User } from "~/entities/user";
 import {
   getCursorPosition,
   getCursorPositionInHTML,
-  getMentionDummyText,
+  getMentionsDummyText,
   getMentionQuery,
   sanitizeAndNormalize,
   type CursorPosition,
+  setCursorAfterNode,
 } from "./utils";
 import { Mention } from "../Mention/Mention";
 import { createRoot } from "react-dom/client";
+import { isTargetInElement } from "~/utils/isTargetInElement";
 
 interface RichInputProps {
   users: User[] | undefined;
@@ -32,65 +34,80 @@ export const RichInput = ({
   const inputRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
 
-  function processMentions(value: string, users: { username: string }[]) {
-    if (!inputRef.current) return;
-    const newHTML = getMentionDummyText(value, users);
+  const userMap = useMemo(() => {
+    if (!users) return new Map();
+    return new Map(users.map((user) => [user.username, user]));
+  }, [users]);
 
-    // Update innerHTML with the dummy spans
-    inputRef.current.innerHTML = newHTML;
+  const processMentions = useCallback(
+    (value: string) => {
+      {
+        if (!inputRef.current) return;
+        const newHTML = getMentionsDummyText(value, userMap);
 
-    // Find dummy spans and attach React components
-    const mentionElements = inputRef.current.querySelectorAll("span");
-    mentionElements.forEach((el) => {
-      const username = el.getAttribute("data-username");
-      if (!username) return;
-      const user = users.find((user) => user.username === username);
-      if (!user) return;
-      // Clean up containing spans
-      el.removeAttribute("data-username");
-      (el as HTMLElement).contentEditable = "false";
-      // Attach React component
-      const root = createRoot(el);
-      root.render(<Mention user={user} />);
-    });
-  }
+        // Update innerHTML with the dummy spans
+        inputRef.current.innerHTML = newHTML;
+
+        // Find dummy spans and attach React components
+        const mentionElements = inputRef.current.querySelectorAll(
+          "span[data-username]",
+        );
+        mentionElements.forEach((el) => {
+          const username = el.getAttribute("data-username");
+          if (!username) return;
+          const user = userMap.get(username);
+          if (!user) return;
+          // Clean up containing spans
+          el.removeAttribute("data-username");
+          (el as HTMLElement).contentEditable = "false";
+          // Attach React component
+          const root = createRoot(el);
+          root.render(<Mention user={user} />);
+        });
+      }
+    },
+    [userMap],
+  );
 
   useEffect(() => {
-    if (initialValue !== value && users !== undefined) {
+    if (initialValue !== value && userMap.size > 0) {
       setValue(initialValue);
       if (inputRef.current) {
-        processMentions(initialValue, users);
+        processMentions(initialValue);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Only for initialValue
-  }, [initialValue, users]);
+  }, [initialValue, userMap]);
 
-  const updateMentionState = (
-    element: HTMLDivElement,
-    currentValue: string,
-  ) => {
-    if (!element) return;
-    const cursorPos = getCursorPosition(element);
-    setCursorPosition(cursorPos);
-    const query = getMentionQuery(currentValue, cursorPos.char);
-    if (query !== null) {
-      setDropdownQuery(query);
-      setIsDropdownOpen(true);
-    } else {
-      setDropdownQuery("");
-      setIsDropdownOpen(false);
-    }
-  };
+  const updateMentionState = useCallback(
+    (element: HTMLDivElement, currentValue: string) => {
+      if (!element) return;
+      const cursorPos = getCursorPosition(element);
+      setCursorPosition(cursorPos);
+      const query = getMentionQuery(currentValue, cursorPos.char);
+      if (query !== null) {
+        setDropdownQuery(query);
+        setIsDropdownOpen(true);
+      } else {
+        setDropdownQuery("");
+        setIsDropdownOpen(false);
+      }
+    },
+    [],
+  );
 
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const newValue = e.currentTarget.innerHTML;
-    const parsedValue = sanitizeAndNormalize(newValue);
-    setValue(parsedValue);
-    onChange(parsedValue);
-    if (inputRef.current) {
-      updateMentionState(inputRef.current, parsedValue);
-    }
-  };
+  const handleInput = useCallback(
+    (e: React.FormEvent<HTMLDivElement>) => {
+      const newValue = e.currentTarget.innerHTML;
+      const parsedValue = sanitizeAndNormalize(newValue);
+      setValue(parsedValue);
+      onChange(parsedValue);
+      if (inputRef.current) {
+        updateMentionState(inputRef.current, parsedValue);
+      }
+    },
+    [onChange, updateMentionState],
+  );
 
   const handleCursorChange = () => {
     if (inputRef.current) {
@@ -98,13 +115,9 @@ export const RichInput = ({
     }
   };
 
-  const clearDropdown = (e: React.FocusEvent) => {
-    if (
-      e.relatedTarget &&
-      dropdownRef.current?.contains(e.relatedTarget as Node)
-    ) {
-      return;
-    }
+  const clearDropdownOnBlur = (e: React.FocusEvent) => {
+    if (!dropdownRef.current || !e.relatedTarget) return;
+    if (isTargetInElement(dropdownRef.current, e.relatedTarget)) return;
 
     setIsDropdownOpen(false);
     setDropdownQuery("");
@@ -130,17 +143,18 @@ export const RichInput = ({
     onChange(newValue);
 
     // Then update the innerHTML
-    const element = inputRef.current.innerHTML;
-    const cursorPositionInHTML = getCursorPositionInHTML(inputRef.current);
-    const mentionStartHTML = element.lastIndexOf("@", cursorPositionInHTML);
-
+    const element = inputRef.current;
+    const htmlContent = element.innerHTML;
+    const cursorPositionInHTML = getCursorPositionInHTML(element);
+    const mentionStartHTML = htmlContent.lastIndexOf("@", cursorPositionInHTML);
     if (mentionStartHTML === -1) return;
 
     // Replace the @query with a span with id to then replace with the mention component
-    const beforeMentionHTML = element.substring(0, mentionStartHTML);
-    const afterMentionHTML = element.substring(
+    const beforeMentionHTML = htmlContent.substring(0, mentionStartHTML);
+    const afterMentionHTML = htmlContent.substring(
       mentionStartHTML + dropdownQuery.length + 1,
     );
+    // Insert dummy span
     const newValueHTML = `${beforeMentionHTML}<span id="mention"></span>${afterMentionHTML}`;
     inputRef.current.innerHTML = newValueHTML;
 
@@ -164,12 +178,7 @@ export const RichInput = ({
       );
 
       // Set cursor after the space
-      const range = document.createRange();
-      range.setStartAfter(spaceNode);
-      range.setEndAfter(spaceNode);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
+      setCursorAfterNode(selection, spaceNode);
     }
   };
 
@@ -185,7 +194,7 @@ export const RichInput = ({
         onInput={handleInput}
         onClick={handleCursorChange}
         onKeyUp={handleCursorChange}
-        onBlur={clearDropdown}
+        onBlur={clearDropdownOnBlur}
         aria-multiline="true"
         aria-label="Note content"
         aria-describedby="note-editor"

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { User } from "~/entities/user";
 import { Tooltip } from "../Tooltip/Tooltip";
 import { TooltipContent } from "./TooltipContent";
+import { isTargetInElement } from "~/utils/isTargetInElement";
 
 interface MentionProps {
   user: User;
@@ -14,10 +15,10 @@ export const Mention = ({ user }: MentionProps) => {
 
   useEffect(() => {
     const handleHoverState = (event: MouseEvent) => {
-      if (!mentionRef.current || !tooltipRef.current) return;
+      if (!mentionRef.current || !tooltipRef.current || !event.target) return;
 
-      const isOverMention = mentionRef.current.contains(event.target as Node);
-      const isOverTooltip = tooltipRef.current.contains(event.target as Node);
+      const isOverMention = isTargetInElement(mentionRef.current, event.target);
+      const isOverTooltip = isTargetInElement(tooltipRef.current, event.target);
 
       if (!isOverMention && !isOverTooltip) {
         setShowTooltip(false);

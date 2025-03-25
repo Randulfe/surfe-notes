@@ -4,13 +4,16 @@ import { Button } from "~/design-system/components/Button/Button";
 import { SidebarItem } from "~/design-system/components/SideBarItem/SidebarItem";
 import type { Note } from "~/entities/note";
 import { useCreateNote, useNotes } from "~/web/notes";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { BurgerIcon } from "~/design-system/components/Icons";
 import { useSessionStore } from "~/stores/session";
 import { Select, type Option } from "~/design-system/components/Select/Select";
 import { Input } from "~/design-system/components/Input/Input";
 import { Modal } from "~/design-system/components/Modal/Modal";
 import DOMPurify from "dompurify";
+
+const MAX_WORKSPACE_LENGTH = 10;
+const MIN_WORKSPACE_LENGTH = 1;
 
 export default function ProjectLayout() {
   const {
@@ -27,9 +30,7 @@ export default function ProjectLayout() {
   const queryClient = useQueryClient();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [newWorkspace, setNewWorkspace] = useState("");
-  const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(
-    sessions.length === 0,
-  );
+  const [isNewSessionModalOpen, setIsNewSessionModalOpen] = useState(false);
 
   const handleCreateNote = () => {
     createNote(undefined, {
@@ -51,24 +52,28 @@ export default function ProjectLayout() {
     });
   };
 
-  const handleCreateSession = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleCreateSession = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    if (!e.currentTarget.checkValidity()) return;
+      if (!e.currentTarget.checkValidity()) return;
 
-    // Sanitize the workspace name
-    const sanitizedWorkspace = DOMPurify.sanitize(
-      newWorkspace.trim(),
-      {},
-    ).trim();
-    if (sanitizedWorkspace.length < 1 || sanitizedWorkspace.length > 50) return;
-    const encodedWorkspace = encodeURIComponent(sanitizedWorkspace);
+      // Sanitize the workspace name
+      const sanitizedWorkspace = DOMPurify.sanitize(
+        newWorkspace.trim(),
+        {},
+      ).trim();
+      if (sanitizedWorkspace.length < 1 || sanitizedWorkspace.length > 50)
+        return;
+      const encodedWorkspace = encodeURIComponent(sanitizedWorkspace);
 
-    addSession({ value: encodedWorkspace, label: sanitizedWorkspace });
-    setActiveSession({ value: encodedWorkspace, label: sanitizedWorkspace });
-    setNewWorkspace("");
-    setIsNewSessionModalOpen(false);
-  };
+      addSession({ value: encodedWorkspace, label: sanitizedWorkspace });
+      setActiveSession({ value: encodedWorkspace, label: sanitizedWorkspace });
+      setNewWorkspace("");
+      setIsNewSessionModalOpen(false);
+    },
+    [newWorkspace, addSession, setActiveSession],
+  );
 
   // TODO: Add toast to show error if notes aren't reachable
 
@@ -190,8 +195,8 @@ export default function ProjectLayout() {
               placeholder="Workspace name"
               value={newWorkspace}
               onChange={(e) => setNewWorkspace(e.target.value)}
-              minLength={1}
-              maxLength={50}
+              minLength={MIN_WORKSPACE_LENGTH}
+              maxLength={MAX_WORKSPACE_LENGTH}
               required
             />
             <div className="w-fit">

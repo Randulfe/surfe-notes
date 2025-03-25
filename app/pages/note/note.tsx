@@ -1,13 +1,11 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RichInput } from "~/design-system/components/RichInput/RichInput";
-import { useDebounce } from "~/hooks/useDebounce";
-import { useNotes, useUpdateNote } from "~/web/notes";
+import { useNotes } from "~/web/notes";
 import { useUsers } from "~/web/users";
-import type { Note as NoteType } from "~/entities/note";
 import { LoadingIndicator } from "~/design-system/components/LoadingIndicator/LoadingIndicator";
 import { useSessionStore } from "~/stores/session";
 import { useNavigate } from "react-router";
+import { useUpdateNoteDebounced } from "~/hooks/useUpdateNote";
 
 const NoteError = () => {
   return (
@@ -26,20 +24,25 @@ const NoteError = () => {
 };
 
 export const Note = ({ id }: { id: string }) => {
+  const [content, setContent] = useState("");
   const { activeSession } = useSessionStore();
-  const navigate = useNavigate();
   const {
     data: notes,
     isLoading: isLoadingNotes,
     isError: isErrorNotes,
   } = useNotes(activeSession?.value);
   const { data: users } = useUsers();
-  const { mutate: updateNote } = useUpdateNote(activeSession?.value);
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const note = useMemo(() => {
     return notes?.find((note) => note.id.toString() === id);
   }, [notes, id]);
+
+  useUpdateNoteDebounced({
+    activeSession,
+    content,
+    note: { id, body: note?.body },
+  });
 
   // Redirect to home if note doesn't exist
   useEffect(() => {
@@ -48,42 +51,11 @@ export const Note = ({ id }: { id: string }) => {
     }
   }, [isLoadingNotes, notes, note, navigate]);
 
-  const [content, setContent] = useState(note?.body ?? "");
-
   useEffect(() => {
     if (note?.body !== undefined) {
       setContent(note.body);
     }
   }, [note?.body]);
-
-  const handleUpdateNote = useCallback(
-    (value: string) => {
-      if (value === note?.body) return;
-      updateNote(
-        {
-          noteId: id,
-          note: value,
-        },
-        {
-          onSuccess: (updatedNote: NoteType) => {
-            queryClient.setQueryData(
-              ["notes", activeSession],
-              (oldData: NoteType[]) => {
-                return oldData.map((note) =>
-                  note.id === updatedNote.id ? updatedNote : note,
-                );
-              },
-            );
-          },
-          onError: () => {
-            // TODO: Add toast to show error on update note with useful message
-          },
-        },
-      );
-    },
-    [note, id, updateNote, queryClient, activeSession],
-  );
-  useDebounce(content, handleUpdateNote, 1000);
 
   const handleContentChange = (content: string) => {
     setContent(content);

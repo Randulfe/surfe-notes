@@ -42,3 +42,10 @@ export const Large: Story = {
     children: "Button",
   },
 };
+
+export const Danger: Story = {
+  args: {
+    children: "Button",
+    status: "error",
+  },
+};

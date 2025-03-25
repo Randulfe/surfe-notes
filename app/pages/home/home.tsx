@@ -12,10 +12,26 @@ import { useSessionStore } from "~/stores/session";
 import { useNotes } from "~/web/notes";
 import { NoteNode } from "./noteNode";
 import type { Node } from "@xyflow/react";
+import type { Note } from "~/entities/note";
 
 const DEFAULT_Y_POSITION = 250;
 const DEFAULT_X_SPACING = 300;
 const DEFAULT_X_GAP = 50;
+
+const noteToNode = (note: Note, index?: number): Node => ({
+  id: note.id.toString(),
+  type: "notes",
+  position: {
+    x: index ? index * DEFAULT_X_SPACING + DEFAULT_X_GAP : DEFAULT_Y_POSITION,
+    y: DEFAULT_Y_POSITION,
+  },
+  deletable: false,
+  data: { body: note.body, id: note.id },
+});
+
+const notesToNodes = (notes: Note[]): Node[] => {
+  return notes.map((note, index) => noteToNode(note, index));
+};
 
 export function HomePage() {
   const { activeSession } = useSessionStore();
@@ -30,18 +46,8 @@ export function HomePage() {
   useEffect(() => {
     if (!notes) return;
     if (nodes.length === 0) {
-      const initialNodes = notes.map((note, index) => ({
-        id: note.id.toString(),
-        type: "notes",
-        position: {
-          x: index * DEFAULT_X_SPACING + DEFAULT_X_GAP,
-          y: DEFAULT_Y_POSITION,
-        },
-        deletable: false,
-        data: { body: note.body, id: note.id },
-      }));
+      const initialNodes = notesToNodes(notes);
       setNodes(initialNodes);
-      return;
     } else {
       setNodes((prevNodes) => {
         const updatedNodes = notes?.map((note) => {
@@ -57,18 +63,12 @@ export function HomePage() {
               },
             };
           }
-          return {
-            id: note.id.toString(),
-            type: "notes",
-            position: { x: DEFAULT_Y_POSITION, y: DEFAULT_Y_POSITION },
-            deletable: false,
-            data: { body: note.body, id: note.id },
-          };
+          return noteToNode(note);
         });
         return updatedNodes ?? [];
       });
     }
-  }, [setNodes, notes, nodes.length]);
+  }, [notes, nodes.length, setNodes]);
 
   return (
     <>

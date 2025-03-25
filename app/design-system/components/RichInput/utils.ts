@@ -1,32 +1,49 @@
 import DOMPurify from "dompurify";
 import type { User } from "~/entities/user";
 
+const DIV_CHROME_REGEX = /<div><br\s*\/?><\/div>/gi;
+const DIV_OPEN_REGEX = /<div>/gi;
+const DIV_CLOSE_REGEX = /<\/div>/gi;
+const BR_REGEX = /<br>/gi;
+const P_OPEN_REGEX = /<p>/gi;
+const P_CLOSE_REGEX = /<\/p>/gi;
+const MENTION_REGEX_HTML = /<span[^>]*><span[^>]*>@([^<]+)<\/span><\/span>/gi;
+const NBSP_REGEX = /&nbsp;/g;
+
+const MENTION_REGEX = /(^|(?:<br\s*\/?>|\s))(@(\S+))/gi;
+
 export const sanitizeAndNormalize = (value: string): string => {
+  if (!value) return "";
   // Sanitize user input (this won't change tags added by the browser)
   let result = DOMPurify.sanitize(value);
 
   // Chrome: <div><br/></div>
-  result = result.replace(/<div><br\s*\/?><\/div>/gi, "<br/>");
+  result = result.replace(DIV_CHROME_REGEX, "<br/>");
 
   // Wrapping divs
-  result = result.replace(/<div>/gi, "<br/>").replace(/<\/div>/gi, "");
+  result = result.replace(DIV_OPEN_REGEX, "<br/>").replace(DIV_CLOSE_REGEX, "");
 
   // Convert <br> to <br/>
-  result = result.replace(/<br>/gi, "<br/>");
+  result = result.replace(BR_REGEX, "<br/>");
 
   // Wrapping ps
-  result = result.replace(/<p>/gi, "<br/>").replace(/<\/p>/gi, "");
+  result = result.replace(P_OPEN_REGEX, "<br/>").replace(P_CLOSE_REGEX, "");
 
   // Convert mention components back to @username format
-  result = result.replace(
-    /<span[^>]*><span[^>]*>@([^<]+)<\/span><\/span>/gi,
-    "@$1",
-  );
+  result = result.replace(MENTION_REGEX_HTML, "@$1");
 
   // Handle some browsers converting some spaces to &nbsp;
-  result = result.replace(/&nbsp;/g, " ");
+  result = result.replace(NBSP_REGEX, " ");
 
   return result;
+};
+
+const getRange = (): Range | null => {
+  const selection = window.getSelection();
+  if (!selection) return null;
+  const range = selection.getRangeAt(0);
+  if (!range) return null;
+  return range;
 };
 
 export interface CursorPosition {
@@ -36,11 +53,9 @@ export interface CursorPosition {
 }
 
 export const getCursorPositionInHTML = (element: HTMLDivElement): number => {
-  const selection = window.getSelection();
-  if (!selection || !element) return 0;
-  const range = selection.getRangeAt(0);
+  if (!element) return 0;
+  const range = getRange();
   if (!range) return 0;
-
   // Create a temporary div to hold the content
   const tempDiv = document.createElement("div");
 
@@ -67,31 +82,29 @@ export const getCursorPositionInHTML = (element: HTMLDivElement): number => {
   }
   // HTML up to cursor
   const htmlUpToCursor = tempDiv.innerHTML;
-
   return htmlUpToCursor.length;
 };
 
 export const getCursorPosition = (element: HTMLDivElement): CursorPosition => {
+  if (!element) return { x: 0, y: 0, char: 0 };
+
   // First get cursor position without taking into account the sanitized HTML
-  const selection = window.getSelection();
-  if (!selection || !element) return { x: 0, y: 0, char: 0 };
-  const range = selection.getRangeAt(0);
+  const range = getRange();
   if (!range) return { x: 0, y: 0, char: 0 };
+
   const clonedRange = range.cloneRange();
   clonedRange.selectNodeContents(element);
   clonedRange.setEnd(range.endContainer, range.endOffset);
-  const position = range.getClientRects()[0];
+  const position = range.getClientRects()
+    ? range.getClientRects()[0]
+    : { x: 0, y: 0 };
 
   // Get HTML up to cursor position to apply the sanitization
   const tempDiv = document.createElement("div");
   tempDiv.appendChild(clonedRange.cloneContents());
   const processedText = sanitizeAndNormalize(tempDiv.innerHTML);
 
-  return {
-    x: position?.x ?? 0,
-    y: position?.y ?? 0,
-    char: processedText.length,
-  };
+  return { x: position?.x, y: position?.y, char: processedText.length };
 };
 
 export const getMentionQuery = (
@@ -143,15 +156,24 @@ export const getMentionQuery = (
   return currentWord.slice(1);
 };
 
-export const getMentionDummyText = (value: string, users: User[]) => {
-  // Regex to find @username
-  const regex = /(^|(?:<br\s*\/?>|\s))(@(\S+))/gi;
-
+export const getMentionsDummyText = (
+  value: string,
+  userMap: Map<string, User>,
+): string => {
   // Replace valid mentions with dummy span if user exists
-  const newHTML = value.replace(regex, (match, prefix, _, username) => {
-    const user = users.find((user) => user.username === username);
+  const newHTML = value.replace(MENTION_REGEX, (match, prefix, _, username) => {
+    const user = userMap.get(username);
     if (!user) return match;
     return prefix + `<span data-username="${username}"></span>`;
   });
   return newHTML;
+};
+
+export const setCursorAfterNode = (selection: Selection, node: Node) => {
+  const range = document.createRange();
+  range.setStartAfter(node);
+  range.setEndAfter(node);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
 };

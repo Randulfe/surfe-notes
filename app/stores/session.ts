@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Workspace } from "~/entities/workspace";
 
 interface SessionStore {
-  sessions: { value: string; label: string }[];
-  activeSession: { value: string; label: string } | null;
-  addSession: (session: { value: string; label: string }) => void;
-  setActiveSession: (session: { value: string; label: string }) => void;
-  removeSession: (session: { value: string; label: string }) => void;
+  sessions: Workspace[];
+  activeSession: Workspace | null;
+  addSession: (session: Workspace) => void;
+  setActiveSession: (session: Workspace) => void;
+  removeSession: (session: Workspace) => void;
   removeAllSessions: () => void;
 }
 
@@ -15,17 +16,16 @@ export const useSessionStore = create<SessionStore>()(
     (set) => ({
       sessions: [],
       activeSession: null,
-      addSession: (session: { value: string; label: string }) =>
+      addSession: (session: Workspace) =>
         set((state) => ({ sessions: [...state.sessions, session] })),
-      removeSession: (sessionToRemove: { value: string; label: string }) =>
+      removeSession: (sessionToRemove: Workspace) =>
         set((state) => ({
           sessions: state.sessions.filter(
             (session) => session.value !== sessionToRemove.value,
           ),
         })),
       removeAllSessions: () => set({ sessions: [], activeSession: null }),
-      setActiveSession: (session: { value: string; label: string }) =>
-        set({ activeSession: session }),
+      setActiveSession: (session: Workspace) => set({ activeSession: session }),
     }),
     { name: "session" },
   ),

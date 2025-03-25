@@ -7,16 +7,16 @@ interface TooltipContentProps {
 }
 
 export const TooltipContent = ({ user }: TooltipContentProps) => {
+  console.log(user);
   return (
     <>
       <div>
         <p className="text-primary">@{user.username}</p>
-        {user.firstName ||
-          (user.lastName && (
-            <p className="text-sm text-gray-500">
-              {user?.firstName} {user?.lastName}
-            </p>
-          ))}
+        {(user.firstName || user.lastName) && (
+          <p className="text-sm text-gray-500">
+            {user?.firstName} {user.lastName}
+          </p>
+        )}
       </div>
       {(user.email || user.phone || user.location) && (
         <div className="flex flex-row gap-2">
