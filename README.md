@@ -37,6 +37,7 @@ A NextJS/Tanstack SSR solution seems a bit of an overkill, specially given that 
 This solution uses a minimal set of libraries that don't solve any of the tasks from tha assignment for myself. These are just libraries that help me maintain good practices and standards and power up throw the nice to haves and application development.
 
 - Tanstack Query: Great solution for controlling API/BE/third parties state and context. It solves many complex problems for you (caching, pagination, etc.) without taking away the flexibility and low level control you might need.
+
 - React Router: Simple solution great for an SPA that manages all the browser history complexities and lets you focus on what matters: architecting the application and how the user interacts with it.
 - Tailwind: Low level scalable solution for styling keeping context in the component and isolating abstraction to the application entities (user input, dashboards, etc.) rather than the technologies (HTML, CSS, JS, etc.). I believe this is the USP of React and Tailwind just enables that in the styling dimension.
 - Storybook: Will speed up UI/UX component building, isolating their functionality and allowing easy and fast testing. It will also enable true E2E component testing that isn't a waste of time in the FE.
