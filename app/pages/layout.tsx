@@ -12,7 +12,7 @@ import { Input } from "~/design-system/components/Input/Input";
 import { Modal } from "~/design-system/components/Modal/Modal";
 import DOMPurify from "dompurify";
 
-const MAX_WORKSPACE_LENGTH = 10;
+const MAX_WORKSPACE_LENGTH = 50;
 const MIN_WORKSPACE_LENGTH = 1;
 
 export default function ProjectLayout() {
@@ -173,7 +173,11 @@ export default function ProjectLayout() {
           </div>
 
           <div className="px-2 py-5">
-            <Button variant="tertiary" onClick={handleCreateNote}>
+            <Button
+              variant="tertiary"
+              onClick={handleCreateNote}
+              disabled={sessions.length === 0}
+            >
               Create Note
             </Button>
           </div>
